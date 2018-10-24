@@ -2,6 +2,7 @@ var express = require("express");
 var mysql = require("mysql")
 var app = express();
 var bodyParser = require("body-parser");
+var child_process = require("child_process");
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,7 +48,7 @@ app.get("/", function(req, res) {
             res.render("landing", { rows: rows });
     });
 });
-// Add Description*******************************
+// Add Description************************************
 
 app.get("/add", function(req, res) {
     res.render("add-description");
@@ -62,12 +63,29 @@ app.post("/add", function(req, res) {
         res.redirect("https://webapp-yuchenpeng.c9users.io/");
     })
 });
+// Applications****************************************
+// Only available in Windows because of the execution of a bat file
+// Also note that the web page changed to port 3000
+app.get("/app", function(req, res) {
+    res.render("applications");
+});
+app.post("/app", function(req, res) {
+   var app = req.body.app; 
+   child_process.exec('cmd /c RUN.bat', function(err, stdout, stderr) {
+       if (err) {
+            return console.log(err);
+        }
+        console.log(stdout);
+   });
+   res.redirect("http://localhost:3000/#");
+});
+
 
 // Data Loading ***************************************
 app.get("/:Tables_in_newarkdata", function(req, res) {
     var tableName = req.params.Tables_in_newarkdata;
     connection.query("SELECT * FROM " + tableName + " LIMIT 20", function(err, rows, fields) {
-        res.render("dataPage", { rows, fields, tableName });
+        res.render("dataPage", {rows, fields, tableName});
     });
 });
 
@@ -75,7 +93,7 @@ app.get("/:Tables_in_newarkdata", function(req, res) {
 app.get("/:Tables_in_newarkdata/see-description", function(req, res) {
     var tableName = req.params.Tables_in_newarkdata;
     connection2.query("SELECT * FROM `description` WHERE dataset = " + "'" + tableName + "'", function(err, rows, fields) {
-        res.render("see-description", { rows, fields, tableName });
+        res.render("see-description", {rows, fields, tableName});
     });
 });
 // Edit Description ************************************
@@ -97,7 +115,7 @@ app.post("/:Tables_in_newarkdata/see-description/edit-description", function(req
     });
 });
 
-//Drop table*******************************************
+// Drop table*******************************************
 app.get("/:Tables_in_newarkdata/drop", function(req, res) {
     var tableName = req.params.Tables_in_newarkdata;
     connection.query("Drop table `" + tableName + "`", function(err, rows, fields) {
@@ -105,9 +123,7 @@ app.get("/:Tables_in_newarkdata/drop", function(req, res) {
     });
 });
 
-
-
-// Visualize ******************************************
+// Visualize *******************************************
 app.use('/abandoned_properties', express.static('public'));
 app.use('/newark_housing', express.static('public'));
 app.get("/:Tables_in_newarkdata/:graph", function(req, res) {
