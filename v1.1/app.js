@@ -14,9 +14,9 @@ app.listen(process.env.PORT, process.env.IP, function() {
 
 // mysql Connection *****************************
 var connection = mysql.createConnection({
-    host: "ec2-18-233-10-73.compute-1.amazonaws.com",
-    user: "luke",
-    password: "yuchen",
+    host: "localhost",
+    user: "root",
+    password: "",
     database: "newarkdata"
 });
 connection.connect(function(error) {
@@ -25,9 +25,9 @@ connection.connect(function(error) {
 });
 
 var connection2 = mysql.createConnection({
-    host: "ec2-18-233-10-73.compute-1.amazonaws.com",
-    user: "luke",
-    password: "yuchen",
+    host: "localhost",
+    user: "root",
+    password: "",
     database: "data_description"
 });
 connection2.connect(function(error) {
@@ -80,6 +80,20 @@ app.post("/app", function(req, res) {
    res.redirect("http://localhost:3000/#");
 });
 
+// Insert Rows*****************************************
+app.get("/insert-rows", function(req, res) {
+    res.render("insert-rows");
+});
+app.post("/insert-rows", function(req, res) {
+    child_process.exec('cmd /c InsertRows.bat', function(err, stdout, stderr) {
+       if (err) {
+            return console.log(err);
+        }
+        console.log(stdout);
+   });
+   res.redirect("http://localhost:3000/#");
+})
+
 
 // Data Loading ***************************************
 app.get("/:Tables_in_newarkdata", function(req, res) {
@@ -122,6 +136,7 @@ app.get("/:Tables_in_newarkdata/drop", function(req, res) {
         res.redirect("https://webapp-yuchenpeng.c9users.io/");
     });
 });
+
 
 // Visualize *******************************************
 app.use('/abandoned_properties', express.static('public'));
